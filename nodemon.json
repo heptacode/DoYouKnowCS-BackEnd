@@ -1,0 +1,12 @@
+{
+  "watch": [
+    "src",
+    "package.json",
+    "pm2.json",
+    "tsconfig.json",
+    "webpoack.config.js",
+    ".env"
+  ],
+  "exec": "ts-node src/app.ts",
+  "ext": "ts"
+}
