@@ -64,9 +64,16 @@
 };
 */
 import axios from "axios";
+import * as moment from "moment";
+import "moment-timezone";
+moment.tz.setDefault("Asia/Seoul");
 
 async function getMeal() {
   const { data } = await axios.get("https://school.iamservice.net/api/article/organization/17195/group/2071367?next_token=0");
+  Object.keys(data.articles).forEach(key => {
+    console.log(key);
+    console.log(moment(new Date()).format("YYYY.MM.DD"));
+  });
   return data;
 }
 export default getMeal;

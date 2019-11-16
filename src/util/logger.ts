@@ -4,28 +4,28 @@ import "moment-timezone";
 moment.tz.setDefault("Asia/Seoul");
 
 class logger {
-  public getTime(): string {
+  public getTsp(): string {
     return moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   }
   // Error
   public e(str: string) {
-    console.log(`[${this.getTime()}] ${chalk.red(str)}`);
+    console.log(`[${this.getTsp()}] ${chalk.red(str)}`);
   }
   // Warning
   public w(str: string) {
-    console.log(`[${this.getTime()}] ${chalk.yellow(str)}`);
+    console.log(`[${this.getTsp()}] ${chalk.yellow(str)}`);
   }
   // Info
   public i(str: string) {
-    console.log(`[${this.getTime()}] ${chalk.cyan(str)}`);
+    console.log(`[${this.getTsp()}] ${chalk.cyan(str)}`);
   }
   // Success
   public s(str: string) {
-    console.log(`[${this.getTime()}] ${chalk.green(str)}`);
+    console.log(`[${this.getTsp()}] ${chalk.green(str)}`);
   }
   // Verbose
   public v(str: string) {
-    console.log(`[${this.getTime()}] ${chalk.white(str)}`);
+    console.log(`[${this.getTsp()}] ${chalk.white(str)}`);
   }
   // Custom
   public c(obj: object) {
@@ -37,7 +37,7 @@ class logger {
       else if (key == "s") str += `${chalk.green(obj[key])} `;
       else if (key == "v") str += `${chalk.white(obj[key])} `;
     });
-    console.log(`[${this.getTime()}] ${str}`);
+    console.log(`[${this.getTsp()}] ${str}`);
   }
 }
 export default new logger();
