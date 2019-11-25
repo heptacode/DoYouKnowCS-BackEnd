@@ -23,11 +23,23 @@ app.use(express.urlencoded({ extended: true, limit: "500mb" }));
 app.use(express.json({ limit: "500mb" }));
 
 app.get("/", (req, res) => {
-  res.send("403 Forbidden");
+  getMeal("/").then(data => {
+    res.send(data);
+  });
 });
 
-app.get("/meal", (req, res) => {
-  getMeal().then(data => {
+app.get("/monthly", (req, res) => {
+  getMeal("monthly").then(data => {
+    res.send(data);
+  });
+});
+
+app.get("/allergy", (req, res) => {
+  res.send(JSON.stringify(require("./lib/allergy.json")));
+});
+
+app.get("/fetch", (req, res) => {
+  getMeal("fetch").then(data => {
     res.send(data);
   });
 });

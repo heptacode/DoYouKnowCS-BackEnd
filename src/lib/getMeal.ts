@@ -67,13 +67,41 @@ import axios from "axios";
 import * as moment from "moment";
 import "moment-timezone";
 moment.tz.setDefault("Asia/Seoul");
-
-async function getMeal() {
-  const { data } = await axios.get("https://school.iamservice.net/api/article/organization/17195/group/2071367?next_token=0");
-  Object.keys(data.articles).forEach(key => {
-    console.log(key);
-    console.log(moment(new Date()).format("YYYY.MM.DD"));
-  });
-  return data;
+async function getMeal(method: string) {
+  const { todayMeal } = await axios.get(`https://school.iamservice.net/api/article/organization/17195/group/3318247?next_token=0`);
+  const { allMeal } = await axios.get(`https://school.iamservice.net/api/article/organization/17195/group/2071367?next_token=0`);
+  if (method === "/") {
+    let returnData = [];
+    Object.keys(todayMeal.articles).forEach(key => {
+      let _todayMeal = todayMeal.articles[key];
+      let allergy = _todayMeal.content.match(/\d/g);
+      allergy = allergy.join(", ");
+      returnData.push({
+        date: _todayMeal.local_date_of_pub_date,
+        meal: _todayMeal.content,
+        img: _todayMeal.images[0],
+        allergy: allergy
+      });
+    });
+    return returnData;
+  } else if (method === "monthly") {
+    let returnData = [];
+    Object.keys(allMeal.articles).forEach(key => {
+      let _allMeal = allMeal.articles[key];
+      _allMeal.next_token;
+      // console.log(moment(new Date()).format("YYYY.MM.DD"));
+      // if(data[key= )
+      // let allergy = _data.content.replace(/^\D+/g, "");
+      let allergy = _allMeal.content.match(/\d/g);
+      allergy = allergy.join(", ");
+      console.log(allergy);
+      returnData.push({
+        date: _allMeal.local_date_of_pub_date,
+        meal: _allMeal.content,
+        img: _allMeal.images[0],
+        allergy: allergy
+      });
+    });
+  }
 }
 export default getMeal;
