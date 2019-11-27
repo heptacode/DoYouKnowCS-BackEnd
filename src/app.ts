@@ -34,21 +34,15 @@ app.get("/monthly", (req, res) => {
   });
 });
 
-app.get("/allergy", (req, res) => {
-  res.send(JSON.stringify(require("./lib/allergy.json")));
-});
-
-app.get("/fetch", (req, res) => {
-  getMeal("fetch").then(data => {
+app.get("/monthly/:p", (req, res) => {
+  getMeal(parseInt(req.params.p)).then(data => {
     res.send(data);
   });
 });
 
-// app.get("/meal/:p", (req, res) => {
-//   getMeal(parseInt(req.params.p)).then(data => {
-//     res.send(data);
-//   });
-// });
+app.get("/allergy", (req, res) => {
+  res.send(JSON.stringify(require("./lib/allergy.json")));
+});
 
 app.listen(process.env.HTTP_PORT || 80, () => {
   Log.i(`Listening on http://${process.env.HTTP_HOST || "localhost"}:${process.env.HTTP_PORT || 80}`);

@@ -71,7 +71,7 @@ async function getAllMeal(maxToken: number) {
     throw err;
   }
 }
-async function getMeal(method: string) {
+async function getMeal(method: any) {
   if (method === "/") {
     // 오늘, 어제 급식 가져오기
     try {
@@ -79,10 +79,10 @@ async function getMeal(method: string) {
     } catch (err) {
       throw err;
     }
-  } else if (method === "monthly") {
+  } else if (method === "monthly" || parseInt(method)) {
     // 전체 급식 가져오기
     try {
-      return await getAllMeal(40);
+      return await getAllMeal(parseInt(method) ? parseInt(method) : 0);
     } catch (err) {
       throw err;
     }
