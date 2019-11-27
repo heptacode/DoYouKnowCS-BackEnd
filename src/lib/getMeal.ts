@@ -67,40 +67,89 @@ import axios from "axios";
 import * as moment from "moment";
 import "moment-timezone";
 moment.tz.setDefault("Asia/Seoul");
+
+async function getAllMeal(maxToken: number) {
+  return new Promise<any>((resolve, reject) => {
+    let returnData = [];
+    new Promise<any>((resolve1, reject) => {
+      for (let currentToken = 0; currentToken <= maxToken; currentToken += 20) {
+        axios
+          .get(`https://school.iamservice.net/api/article/organization/17195/group/3318247?next_token=${currentToken}`)
+          .then(data => {
+            resolve1(data.data.articles);
+          })
+          .catch(err => {
+            reject(err);
+          });
+      }
+    });
+    resolve(returnData);
+  });
+}
+// async function getMealmage(nextToken: number) {
+//   return new Promise<any>((resolve, reject) => {
+//     axios
+//       .get(`https://school.iamservice.net/api/article/organization/17195/group/2071367?next_token=${nextToken || 0}`)
+//       .then(data => {
+//         resolve(data);
+//       })
+//       .catch(err => {
+//         reject(err);
+//       });
+//   });
+// }
 async function getMeal(method: string) {
-  const { todayMeal } = await axios.get(`https://school.iamservice.net/api/article/organization/17195/group/3318247?next_token=0`);
-  const { allMeal } = await axios.get(`https://school.iamservice.net/api/article/organization/17195/group/2071367?next_token=0`);
   if (method === "/") {
     let returnData = [];
-    Object.keys(todayMeal.articles).forEach(key => {
-      let _todayMeal = todayMeal.articles[key];
-      let allergy = _todayMeal.content.match(/\d/g);
-      allergy = allergy.join(", ");
-      returnData.push({
-        date: _todayMeal.local_date_of_pub_date,
-        meal: _todayMeal.content,
-        img: _todayMeal.images[0],
-        allergy: allergy
-      });
+    return new Promise<any>((resolve, reject) => {
+      getAllMeal(40)
+        .then(_data => {
+          let todayMeal = _data.articles;
+          Object.keys(todayMeal).forEach(key => {
+            let _todayMeal = todayMeal[key];
+            console.log(_todayMeal.local_date_of_pub_date, moment(new Date()).format("YYYY.MM.DD"));
+            if (moment(new Date()).format("YYYY.MM.DD") == _todayMeal.local_date_of_pub_date) {
+              console.log("Asf");
+              returnData.push({
+                date: _todayMeal.local_date_of_pub_date,
+                meal: _todayMeal.content,
+                img: _todayMeal.images[0]
+              });
+            }
+            // console.log();
+            // returnData[_todayMeal.local_date_of_pub_date] = {
+            //   meal: _todayMeal.content,
+            //   img: _todayMeal.images[0]
+            // };
+          });
+          resolve(returnData);
+        })
+        .catch(err => {
+          reject(err);
+        });
     });
-    return returnData;
   } else if (method === "monthly") {
-    let returnData = [];
-    Object.keys(allMeal.articles).forEach(key => {
-      let _allMeal = allMeal.articles[key];
-      _allMeal.next_token;
-      // console.log(moment(new Date()).format("YYYY.MM.DD"));
-      // if(data[key= )
-      // let allergy = _data.content.replace(/^\D+/g, "");
-      let allergy = _allMeal.content.match(/\d/g);
-      allergy = allergy.join(", ");
-      console.log(allergy);
-      returnData.push({
-        date: _allMeal.local_date_of_pub_date,
-        meal: _allMeal.content,
-        img: _allMeal.images[0],
-        allergy: allergy
-      });
+    let returnData = {};
+    return new Promise<any>((resolve, reject) => {
+      getAllMeal(0)
+        .then(_data => {
+          let allMeal = _data.articles;
+          Object.keys(allMeal).forEach(key => {
+            let _allMeal = allMeal[key];
+            let allergy = _allMeal.content.match(/\d/g);
+            allergy = allergy.join(", ");
+            console.log(allergy);
+            returnData[_allMeal.local_date_of_pub_date] = {
+              meal: _allMeal.content,
+              img: _allMeal.images[0],
+              allergy: allergy
+            };
+          });
+          resolve(returnData);
+        })
+        .catch(err => {
+          reject(err);
+        });
     });
   }
 }
