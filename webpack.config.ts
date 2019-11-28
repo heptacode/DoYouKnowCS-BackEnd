@@ -12,7 +12,7 @@ export default {
       {
         test: /\.tsx?$/,
         use: "ts-loader",
-        exclude: /node_modules/
+        exclude: /node_modules
       }
     ]
   },
@@ -20,9 +20,6 @@ export default {
     extensions: [".tsx", ".ts", ".js"]
   },
   devtool: "source-map",
-  // node: {
-  //   __dirname: false
-  // },
   target: "node",
   externals: [nodeExternals()]
 };
