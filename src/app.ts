@@ -45,9 +45,9 @@ app.get("/allergy", (req, res) => {
   res.send(JSON.stringify(require("./lib/allergy.json")));
 });
 
-app.listen(process.env.HTTP_PORT || 80, () => {
+/*app.listen(process.env.HTTP_PORT || 80, () => {
   Log.i(`Listening on http://${process.env.HTTP_HOST || "localhost"}:${process.env.HTTP_PORT || 80}`);
-});
+});*/
 
 const httpsOptions = {
   cert: readFileSync("cert/cert.pem"),
