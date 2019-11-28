@@ -16,9 +16,10 @@ const app: express.Application = express();
 
 app.use(cors());
 app.use(helmet());
-app.use(morgan("dev"));
+app.use(morgan("combined"));
 app.use(compression());
 
+app.set("trust proxy", true);
 app.use(express.urlencoded({ extended: true, limit: "500mb" }));
 app.use(express.json({ limit: "500mb" }));
 
