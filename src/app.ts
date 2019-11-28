@@ -53,7 +53,7 @@ const httpsOptions = {
   cert: readFileSync("cert/cert.pem"),
   key: readFileSync("cert/key.pem")
 };
-https.createServer(httpsOptions, app).listen(process.env.HTTPS_PORT || 443, () => {
+https.createServer(httpsOptions, app).listen(process.env.HTTPS_PORT || 3030, () => {
   Log.i(`Listening on https://${process.env.HTTPS_HOST || "localhost"}:${process.env.HTTPS_PORT || 443}`);
 });
 
