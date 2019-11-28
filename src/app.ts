@@ -16,9 +16,10 @@ const app: express.Application = express();
 
 app.use(cors());
 app.use(helmet());
-app.use(morgan("dev"));
+app.use(morgan("combined"));
 app.use(compression());
 
+app.set("trust proxy", true);
 app.use(express.urlencoded({ extended: true, limit: "500mb" }));
 app.use(express.json({ limit: "500mb" }));
 
@@ -44,16 +45,16 @@ app.get("/allergy", (req, res) => {
   res.send(JSON.stringify(require("./lib/allergy.json")));
 });
 
-app.listen(process.env.HTTP_PORT || 80, () => {
+/*app.listen(process.env.HTTP_PORT || 80, () => {
   Log.i(`Listening on http://${process.env.HTTP_HOST || "localhost"}:${process.env.HTTP_PORT || 80}`);
-});
+});*/
 
 const httpsOptions = {
   cert: readFileSync("cert/cert.pem"),
   key: readFileSync("cert/key.pem")
 };
-https.createServer(httpsOptions, app).listen(process.env.HTTPS_PORT || 443, () => {
-  Log.i(`Listening on https://${process.env.HTTPS_HOST || "localhost"}:${process.env.HTTPS_PORT || 443}`);
+https.createServer(httpsOptions, app).listen(process.env.HTTPS_PORT || 3030, () => {
+  Log.i(`Listening on https://${process.env.HTTPS_HOST || "localhost"}:${process.env.HTTPS_PORT || 3030}`);
 });
 
 export default app;

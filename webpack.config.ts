@@ -20,9 +20,6 @@ export default {
     extensions: [".tsx", ".ts", ".js"]
   },
   devtool: "source-map",
-  // node: {
-  //   __dirname: false
-  // },
   target: "node",
   externals: [nodeExternals()]
 };
