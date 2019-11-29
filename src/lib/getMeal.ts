@@ -5,28 +5,24 @@ moment.tz.setDefault("Asia/Seoul");
 
 const allergyDict = require("./allergy.json");
 
-let formatMeal = (meal: string) => {
+const formatMeal = (meal: string) => {
   return meal.replace(/\n/g, "<br>");
 };
 
-let formatAllergyCodes = (_allergyCodes: any) => {
+const formatAllergyCodes = (_allergyCodes: string) => {
   let allergyCodes = _allergyCodes.match(/\d+\./g);
   allergyCodes = [...new Set(allergyCodes)]; // 중복 제거
-  allergyCodes.sort((a, b) => a - b);
   for (let i in allergyCodes) {
     allergyCodes[i] = allergyCodes[i].replace(/\./g, "");
   }
+  allergyCodes.sort((a: any, b: any) => a - b);
   // allergyCodes = allergyCodes.join(" / "); // 배열을 문자열로 나열
   return allergyCodes;
 };
 
-let extractAllergicFoods = (_allergyCodes: any) => {
-  let allergyCodes = _allergyCodes.match(/\d+\./g);
+const extractAllergicFoods = (_allergyCodes: any) => {
   let allergicFoods = [];
-  allergyCodes = [...new Set(allergyCodes)]; // 중복 제거
-  allergyCodes.sort((a, b) => a - b);
-  for (let i in allergyCodes) {
-    allergyCodes[i] = allergyCodes[i].replace(/\./g, "");
+  for (let i in _allergyCodes) {
     allergicFoods.push(allergyDict[_allergyCodes[i]]);
   }
   return allergicFoods;
@@ -38,9 +34,11 @@ export async function getTodayMeal() {
   let imgURLs = [];
   try {
     let data = await axios.get(`https://school.iamservice.net/api/article/organization/17195/group/2071367?next_token=0`);
-    let imgData = await axios.get(`https://school.iamservice.net/api/article/organization/17195/group/3318247?next_token=0`);
+    let items = data.data.articles;
 
+    let imgData = await axios.get(`https://school.iamservice.net/api/article/organization/17195/group/3318247?next_token=0`);
     let imgItems = imgData.data.articles;
+
     Object.keys(imgItems).forEach(key => {
       let imgItem = imgItems[key];
       let date = imgItem.local_date_of_pub_date.replace(/\./g, "-");
@@ -51,18 +49,18 @@ export async function getTodayMeal() {
       }
     });
 
-    let items = data.data.articles;
     Object.keys(items).forEach(key => {
       let item = items[key];
       let date = item.local_date_of_pub_date.replace(/\./g, "-");
+      let allergyCodes = formatAllergyCodes(item.content);
       if (moment(new Date()).format("YYYY-MM-DD") == date) {
         // 오늘 급식
         returnData[0] = {
           date: date, // 날짜
           meal: formatMeal(item.content), // 식단
           img: imgURLs[0], // 급식 이미지
-          allergyCodes: formatAllergyCodes(item.content),
-          allergicFoods: extractAllergicFoods(item.content)
+          allergyCodes: allergyCodes,
+          allergicFoods: extractAllergicFoods(allergyCodes)
         };
       } else if (moment(new Date().setDate(new Date().getDate() - 1)).format("YYYY-MM-DD") == date) {
         // 어제 급식
@@ -70,8 +68,8 @@ export async function getTodayMeal() {
           date: date, // 날짜
           meal: formatMeal(item.content), // 식단
           img: imgURLs[1], // 급식 이미지
-          allergyCodes: formatAllergyCodes(item.content),
-          allergicFoods: extractAllergicFoods(item.content)
+          allergyCodes: allergyCodes,
+          allergicFoods: extractAllergicFoods(allergyCodes)
         };
       }
     });
@@ -81,25 +79,38 @@ export async function getTodayMeal() {
   }
 }
 
-export async function getMonthlyMeal(month: string) {
+export async function getMonthlyMeal(_month: string) {
   // 월간 급식 메뉴 가져오기
   let returnData = {}; // JSON
   let ifMealFound = false; // 해당 월 급식 정보를 찾았는지의 여부
   try {
-    for (let currentToken = 0; ifMealFound; currentToken += 20) {
+    for (let currentToken = 0; !ifMealFound && currentToken <= 200; currentToken += 20) {
       let data = await axios.get(`https://school.iamservice.net/api/article/organization/17195/group/2071367?next_token=${currentToken}`);
       let items = data.data.articles;
+
       Object.keys(items).forEach(key => {
         let item = items[key];
         let date = item.local_date_of_pub_date.replace(/\./g, "-");
-        returnData[date] = {
-          meal: formatMeal(item.content),
-          allergyCodes: formatAllergyCodes(item.content),
-          allergicFoods: extractAllergicFoods(item.content)
-        };
+        let month = date.slice(0, 7);
+
+        console.log(_month, month);
+
+        if (_month == month) {
+          console.log("일치합니다");
+          ifMealFound = true;
+
+          let allergyCodes = formatAllergyCodes(item.content);
+
+          returnData[month] = {
+            date: date,
+            meal: formatMeal(item.content),
+            allergyCodes: allergyCodes,
+            allergicFoods: extractAllergicFoods(allergyCodes)
+          };
+        }
       });
     }
-    return returnData;
+    return [returnData];
   } catch (err) {
     throw err;
   }
@@ -112,17 +123,20 @@ export async function getAllMeal(maxToken: number) {
     for (let currentToken = 0; currentToken <= maxToken; currentToken += 20) {
       let data = await axios.get(`https://school.iamservice.net/api/article/organization/17195/group/2071367?next_token=${currentToken}`);
       let items = data.data.articles;
+
       Object.keys(items).forEach(key => {
         let item = items[key];
         let date = item.local_date_of_pub_date.replace(/\./g, "-");
+        let allergyCodes = formatAllergyCodes(item.content);
+
         returnData[date] = {
           meal: formatMeal(item.content),
-          allergyCodes: formatAllergyCodes(item.content),
-          allergicFoods: extractAllergicFoods(item.content)
+          allergyCodes: allergyCodes,
+          allergicFoods: extractAllergicFoods(allergyCodes)
         };
       });
     }
-    return returnData;
+    return [returnData];
   } catch (err) {
     throw err;
   }
