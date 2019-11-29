@@ -2,6 +2,10 @@ import axios from "axios";
 import * as moment from "moment";
 import "moment-timezone";
 moment.tz.setDefault("Asia/Seoul");
+import "moment/locale/ko";
+moment.updateLocale("ko", {
+  weekdaysShort: ["일", "월", "화", "수", "목", "금", "토"]
+});
 
 import Log from "../util/logger";
 
@@ -10,9 +14,7 @@ const allergyDict = require("./allergy.json");
 let cache = {};
 
 const formatMeal = (_meal: string) => {
-  return _meal
-    .replace(/\d+\./g, "")
-    .replace(/\n/g, "<br>");
+  return _meal.replace(/\d+\./g, "").replace(/\n/g, "<br>");
 };
 
 const formatAllergyCodes = (_meal: string) => {
@@ -93,7 +95,9 @@ export async function fetchMeal() {
 
 export function getRawMeal() {
   // ShortCuts용 급식 정보 반환
-  return `${cache[moment(new Date()).format("YYYY-MM-DD")]["meal"]}<br>${cache[moment(new Date()).format("YYYY-MM-DD")]["allergicFoods"]}`;
+  return `「 ${moment(new Date()).format("MM.DD(ddd)")} 급식 」<br>
+  &middot; ${cache[moment(new Date()).format("YYYY-MM-DD")]["meal"].replace(/\<br>/g, "<br>&middot; ")}<br><br>
+  &ast;(${cache[moment(new Date()).format("YYYY-MM-DD")]["allergicFoods"]})`;
 }
 
 export function getTodayMeal() {
