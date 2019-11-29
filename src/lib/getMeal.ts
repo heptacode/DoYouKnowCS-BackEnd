@@ -82,9 +82,10 @@ export async function getTodayMeal() {
 export async function getMonthlyMeal(_month: string) {
   // 월간 급식 메뉴 가져오기
   let returnData = {}; // JSON
-  let ifMealFound = false; // 해당 월 급식 정보를 찾았는지의 여부
+  let ifLastMealFound = false; // 해당 월의 마지막 급식 정보를 찾았는지의 여부
+  let ifFirstMealFound = false; // 해당 월의 처음 급식 정보를 찾았는지의 여부
   try {
-    for (let currentToken = 0; !ifMealFound && currentToken <= 200; currentToken += 20) {
+    for (let currentToken = 0; !(ifFirstMealFound && ifLastMealFound) && currentToken <= 200; currentToken += 20) {
       let data = await axios.get(`https://school.iamservice.net/api/article/organization/17195/group/2071367?next_token=${currentToken}`);
       let items = data.data.articles;
 
@@ -93,16 +94,18 @@ export async function getMonthlyMeal(_month: string) {
         let date = item.local_date_of_pub_date.replace(/\./g, "-");
         let month = date.slice(0, 7);
 
-        console.log(_month, month);
-
-        if (_month == month) {
+        if (_month === month) {
+          console.log(_month, month, date);
           console.log("일치합니다");
-          ifMealFound = true;
+          if (date === `${month}-01` || date === `${month}-02` || date === `${month}-03` || date === `${month}-04` || date === `${month}-05`) {
+            ifFirstMealFound = true;
+          } else if (date === `${month}-27` || date === `${month}-28` || date === `${month}-29` || date === `${month}-30` || date === `${month}-31`) {
+            ifLastMealFound = true;
+          }
 
           let allergyCodes = formatAllergyCodes(item.content);
 
-          returnData[month] = {
-            date: date,
+          returnData[date] = {
             meal: formatMeal(item.content),
             allergyCodes: allergyCodes,
             allergicFoods: extractAllergicFoods(allergyCodes)
