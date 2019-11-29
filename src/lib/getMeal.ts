@@ -97,9 +97,9 @@ export async function getMonthlyMeal(_month: string) {
         if (_month === month) {
           console.log(_month, month, date);
           console.log("일치합니다");
-          if (date === `${month}-01` || date === `${month}-02` || date === `${month}-03` || date === `${month}-04` || date === `${month}-05`) {
+          if ([`${month}-01`, `${month}-02`, `${month}-03`, `${month}-04`, `${month}-05`, `${month}-06`].indexOf(date) >= 0) {
             ifFirstMealFound = true;
-          } else if (date === `${month}-27` || date === `${month}-28` || date === `${month}-29` || date === `${month}-30` || date === `${month}-31`) {
+          } else if ([`${month}-26`, `${month}-27`, `${month}-28`, `${month}-29`, `${month}-30`, `${month}-31`].indexOf(date) >= 0) {
             ifLastMealFound = true;
           }
 
