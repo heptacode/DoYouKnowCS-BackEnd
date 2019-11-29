@@ -94,38 +94,44 @@ export async function fetchMeal() {
 
 export function getTodayMeal() {
   // 오늘, 어제 급식
-  try {
-    let todayMeal = cache[moment(new Date()).format("YYYY-MM-DD")];
-    let yesterdayMeal = cache[moment(new Date()).format("YYYY-MM-DD")];
-    return [todayMeal === null ? "급식 없음" : todayMeal, yesterdayMeal === null ? "급식 없음" : yesterdayMeal];
-  } catch (err) {
-    throw err;
-  }
+  let todayMeal = cache[moment(new Date()).format("YYYY-MM-DD")];
+  let yesterdayMeal = cache[moment(new Date()).format("YYYY-MM-DD")];
+  return [todayMeal === null ? "급식 없음" : todayMeal, yesterdayMeal === null ? "급식 없음" : yesterdayMeal];
+}
+export function JgetTodayMeal() {
+  return [
+    {
+      data: getTodayMeal()
+    }
+  ];
 }
 
 export function getMonthlyMeal(_month: string) {
   // 월간 급식
   let mealDatas = {};
-  try {
-    Object.keys(cache).forEach(key => {
-      if (key.slice(0, 7) === _month) {
-        let item = cache[key];
-        mealDatas[key] = {
-          meal: item["meal"],
-          allergyCodes: item["allergyCodes"],
-          allergicFoods: item["allergicFoods"],
-          img: item["img"]
-        };
-      }
-    });
-    return mealDatas;
-  } catch (err) {
-    throw err;
-  }
+  Object.keys(cache).forEach(key => {
+    if (key.slice(0, 7) === _month) {
+      let item = cache[key];
+      mealDatas[key] = {
+        meal: item["meal"],
+        allergyCodes: item["allergyCodes"],
+        allergicFoods: item["allergicFoods"],
+        img: item["img"]
+      };
+    }
+  });
+  return mealDatas;
+}
+export function JgetMonthlyMeal(_month: string) {
+  return [
+    {
+      data: getMonthlyMeal(_month)
+    }
+  ];
 }
 
 export function returnCache() {
   return cache;
 }
 
-export default { fetchMeal, getTodayMeal, getMonthlyMeal, returnCache };
+export default { fetchMeal, getTodayMeal, JgetTodayMeal, getMonthlyMeal, JgetMonthlyMeal, returnCache };
