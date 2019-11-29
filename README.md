@@ -1,5 +1,5 @@
 # MealAPI
-> API Parser for Android & Django Project at Sunrin Internet High School
+> IamSchool API Parser for Android & Django Project at Sunrin Internet High School
 
 ## Yarn Scripts
 **Install dependencies** :
