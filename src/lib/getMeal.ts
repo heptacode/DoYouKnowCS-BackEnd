@@ -9,12 +9,15 @@ const allergyDict = require("./allergy.json");
 
 let cache = {};
 
-const formatMeal = (meal: string) => {
-  return meal.replace(/\n/g, "<br>");
+const formatMeal = (_meal: string) => {
+  return _meal
+    .replace(/\d\./g, "")
+    .replace(/\d/g, "")
+    .replace(/\n/g, "<br>");
 };
 
-const formatAllergyCodes = (_allergyCodes: string) => {
-  let allergyCodes = _allergyCodes.match(/\d+\./g);
+const formatAllergyCodes = (_meal: string) => {
+  let allergyCodes = _meal.match(/\d+\./g);
   allergyCodes = [...new Set(allergyCodes)]; // 중복 제거
   for (let i in allergyCodes) {
     allergyCodes[i] = allergyCodes[i].replace(/\./g, "");
@@ -35,28 +38,31 @@ const extractAllergicFoods = (_allergyCodes: any) => {
 export async function fetchMeal() {
   Log.v("Started Fetching");
 
-  let mealDatas = {};
-  let imgURLs = {};
-  let latestDate = "";
+  let mealDatas = {}; // 급식 객체
+  let imgURLs = {}; // 이미지 객체
+  let latestDate = ""; // 가장 마지막 급식 날짜
 
-  for (let currentToken = 0; ["2019-07-03", "2018-12-27"].indexOf(latestDate) === -1 && currentToken <= 1200; currentToken += 20) {
-    let imgData = await axios.get(`https://school.iamservice.net/api/article/organization/17195/group/3318247?next_token=${currentToken}`);
-    let imgItems = imgData.data.articles;
+  try {
+    for (let currentToken = 0; ["2019-07-03", "2018-12-27"].indexOf(latestDate) === -1 && currentToken <= 1200; currentToken += 20) {
+      let imgData = await axios.get(`https://school.iamservice.net/api/article/organization/17195/group/3318247?next_token=${currentToken}`);
+      let imgItems = imgData.data.articles;
 
-    Object.keys(imgItems).forEach(key => {
-      let imgItem = imgItems[key];
-      let date = imgItem.local_date_of_pub_date.replace(/\./g, "-");
-      if (imgItem.images !== null) {
-        imgURLs[date] = imgItem.images[0];
-      } else {
-        imgURLs[date] = `https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/SunrinInternetHighSchool.png/900px-SunrinInternetHighSchool.png`;
-      }
+      Object.keys(imgItems).forEach(key => {
+        let imgItem = imgItems[key];
+        let date = imgItem.local_date_of_pub_date.replace(/\./g, "-");
+        if (imgItem.images !== null) {
+          imgURLs[date] = imgItem.images[0];
+        } else {
+          imgURLs[date] = `https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/SunrinInternetHighSchool.png/900px-SunrinInternetHighSchool.png`;
+        }
 
-      latestDate = date;
-    });
+        latestDate = date;
+      });
+    }
+    latestDate = "";
+  } catch (err) {
+    throw err;
   }
-
-  latestDate = "";
 
   try {
     for (let currentToken = 0; latestDate !== "2015-03-03" && currentToken <= 2000; currentToken += 20) {
@@ -78,32 +84,31 @@ export async function fetchMeal() {
         latestDate = date;
       });
     }
-
     cache = mealDatas;
-
     Log.s("Finished Fetching");
-
     return mealDatas;
   } catch (err) {
     throw err;
   }
 }
 
-export async function getTodayMeal() {
+export function getTodayMeal() {
   // 오늘, 어제 급식
   try {
-    return [cache[moment(new Date()).format("YYYY-MM-DD")], cache[moment(new Date().setDate(new Date().getDate() - 1)).format("YYYY-MM-DD")]];
+    let todayMeal = cache[moment(new Date()).format("YYYY-MM-DD")];
+    let yesterdayMeal = cache[moment(new Date()).format("YYYY-MM-DD")];
+    return [todayMeal === null ? "급식 없음" : todayMeal, yesterdayMeal === null ? "급식 없음" : yesterdayMeal];
   } catch (err) {
     throw err;
   }
 }
 
-export async function getMonthlyMeal(_month: string) {
+export function getMonthlyMeal(_month: string) {
   // 월간 급식
   let mealDatas = {};
   try {
     Object.keys(cache).forEach(key => {
-      if (key.slice(0, 7) == _month) {
+      if (key.slice(0, 7) === _month) {
         let item = cache[key];
         mealDatas[key] = {
           meal: item["meal"],
@@ -119,4 +124,8 @@ export async function getMonthlyMeal(_month: string) {
   }
 }
 
-export default { fetchMeal, getTodayMeal, getMonthlyMeal };
+export function returnCache() {
+  return cache;
+}
+
+export default { fetchMeal, getTodayMeal, getMonthlyMeal, returnCache };
