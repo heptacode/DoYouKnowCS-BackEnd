@@ -95,8 +95,8 @@ export async function getMonthlyMeal(_month: string) {
         let month = date.slice(0, 7);
 
         if (_month === month) {
-          console.log(_month, month, date);
-          console.log("일치합니다");
+          // console.log(_month, month, date);
+          // console.log("일치합니다");
           if ([`${month}-01`, `${month}-02`, `${month}-03`, `${month}-04`, `${month}-05`, `${month}-06`].indexOf(date) >= 0) {
             ifFirstMealFound = true;
           } else if ([`${month}-26`, `${month}-27`, `${month}-28`, `${month}-29`, `${month}-30`, `${month}-31`].indexOf(date) >= 0) {
