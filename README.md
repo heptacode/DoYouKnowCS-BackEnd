@@ -52,7 +52,7 @@ HTTPS_PORT=(443 for default)
 
 - **/monthly/YYYY-DD**
   - Executes *getMonthlyMeal()* with client parameters
-  - Returns meal object orresponding to client parameters
+  - Returns meal object corresponding to client parameters
 
 - **/fetch**
   - Executes async function *fetchMeal()*
