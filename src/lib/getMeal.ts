@@ -7,7 +7,7 @@ import Log from "../util/logger";
 
 const allergyDict = require("./allergy.json");
 
-let cache = {}; // JSON
+let cache = {};
 
 const formatMeal = (meal: string) => {
   return meal.replace(/\n/g, "<br>");
@@ -33,12 +33,33 @@ const extractAllergicFoods = (_allergyCodes: any) => {
 };
 
 export async function fetchMeal() {
-  let mealDatas = {}; // JSON
-  let imgURLs = [];
+  Log.v("Started Fetching");
+
+  let mealDatas = {};
+  let imgURLs = {};
   let latestDate = "";
 
+  for (let currentToken = 0; ["2019-07-03", "2018-12-27"].indexOf(latestDate) === -1 && currentToken <= 1200; currentToken += 20) {
+    let imgData = await axios.get(`https://school.iamservice.net/api/article/organization/17195/group/3318247?next_token=${currentToken}`);
+    let imgItems = imgData.data.articles;
+
+    Object.keys(imgItems).forEach(key => {
+      let imgItem = imgItems[key];
+      let date = imgItem.local_date_of_pub_date.replace(/\./g, "-");
+      if (imgItem.images !== null) {
+        imgURLs[date] = imgItem.images[0];
+      } else {
+        imgURLs[date] = `https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/SunrinInternetHighSchool.png/900px-SunrinInternetHighSchool.png`;
+      }
+
+      latestDate = date;
+    });
+  }
+
+  latestDate = "";
+
   try {
-    for (let currentToken = 0; latestDate !== "2015-03-03"; currentToken += 20) {
+    for (let currentToken = 0; latestDate !== "2015-03-03" && currentToken <= 2000; currentToken += 20) {
       let data = await axios.get(`https://school.iamservice.net/api/article/organization/17195/group/2071367?next_token=${currentToken}`);
       let items = data.data.articles;
 
@@ -50,37 +71,18 @@ export async function fetchMeal() {
         mealDatas[date] = {
           meal: formatMeal(item.content),
           allergyCodes: allergyCodes,
-          allergicFoods: extractAllergicFoods(allergyCodes)
+          allergicFoods: extractAllergicFoods(allergyCodes),
+          img: imgURLs[date]
         };
 
         latestDate = date;
-        Log.i(date);
       });
-      Log.w(currentToken);
     }
 
-    latestDate = "";
-
-    for (let currentToken = 0; latestDate !== "2019-07-02"; currentToken += 20) {
-      let imgData = await axios.get(`https://school.iamservice.net/api/article/organization/17195/group/3318247?next_token=${currentToken}`);
-      let imgItems = imgData.data.articles;
-
-      Object.keys(imgItems).forEach(key => {
-        let imgItem = imgItems[key];
-        let date = imgItem.local_date_of_pub_date.replace(/\./g, "-");
-
-        mealDatas[date] += {
-          img: imgItem.images[0]
-        };
-
-        latestDate = date;
-        Log.i(date);
-      });
-      Log.w(currentToken);
-    }
-
-    Log.s("Fetch Success");
     cache = mealDatas;
+
+    Log.s("Finished Fetching");
+
     return mealDatas;
   } catch (err) {
     throw err;
@@ -88,120 +90,33 @@ export async function fetchMeal() {
 }
 
 export async function getTodayMeal() {
-  // 오늘, 어제 급식 가져오기
-  let returnData = []; // 배열
-  let imgURLs = [];
+  // 오늘, 어제 급식
   try {
-    let data = await axios.get(`https://school.iamservice.net/api/article/organization/17195/group/2071367?next_token=0`);
-    let items = data.data.articles;
-
-    let imgData = await axios.get(`https://school.iamservice.net/api/article/organization/17195/group/3318247?next_token=0`);
-    let imgItems = imgData.data.articles;
-
-    Object.keys(imgItems).forEach(key => {
-      let imgItem = imgItems[key];
-      let date = imgItem.local_date_of_pub_date.replace(/\./g, "-");
-      if (moment(new Date()).format("YYYY-MM-DD") == date) {
-        imgURLs[0] = imgItem.images[0];
-      } else if (moment(new Date().setDate(new Date().getDate() - 1)).format("YYYY-MM-DD") == date) {
-        imgURLs[1] = imgItem.images[0];
-      }
-    });
-
-    Object.keys(items).forEach(key => {
-      let item = items[key];
-      let date = item.local_date_of_pub_date.replace(/\./g, "-");
-      let allergyCodes = formatAllergyCodes(item.content);
-      if (moment(new Date()).format("YYYY-MM-DD") == date) {
-        // 오늘 급식
-        returnData[0] = {
-          date: date, // 날짜
-          meal: formatMeal(item.content), // 식단
-          img: imgURLs[0], // 급식 이미지
-          allergyCodes: allergyCodes,
-          allergicFoods: extractAllergicFoods(allergyCodes)
-        };
-      } else if (moment(new Date().setDate(new Date().getDate() - 1)).format("YYYY-MM-DD") == date) {
-        // 어제 급식
-        returnData[1] = {
-          date: date, // 날짜
-          meal: formatMeal(item.content), // 식단
-          img: imgURLs[1], // 급식 이미지
-          allergyCodes: allergyCodes,
-          allergicFoods: extractAllergicFoods(allergyCodes)
-        };
-      }
-    });
-    return returnData;
+    return [cache[moment(new Date()).format("YYYY-MM-DD")], cache[moment(new Date().setDate(new Date().getDate() - 1)).format("YYYY-MM-DD")]];
   } catch (err) {
     throw err;
   }
 }
 
 export async function getMonthlyMeal(_month: string) {
-  // 월간 급식 메뉴 가져오기
-  let returnData = {}; // JSON
-  let ifLastMealFound = false; // 해당 월의 마지막 급식 정보를 찾았는지의 여부
-  let ifFirstMealFound = false; // 해당 월의 처음 급식 정보를 찾았는지의 여부
+  // 월간 급식
+  let mealDatas = {};
   try {
-    for (let currentToken = 0; !(ifFirstMealFound && ifLastMealFound) && currentToken <= 200; currentToken += 20) {
-      let data = await axios.get(`https://school.iamservice.net/api/article/organization/17195/group/2071367?next_token=${currentToken}`);
-      let items = data.data.articles;
-
-      Object.keys(items).forEach(key => {
-        let item = items[key];
-        let date = item.local_date_of_pub_date.replace(/\./g, "-");
-        let month = date.slice(0, 7);
-
-        if (_month === month) {
-          // console.log(_month, month, date);
-          // console.log("일치합니다");
-          if ([`${month}-01`, `${month}-02`, `${month}-03`, `${month}-04`, `${month}-05`, `${month}-06`].indexOf(date) >= 0) {
-            ifFirstMealFound = true;
-          } else if ([`${month}-26`, `${month}-27`, `${month}-28`, `${month}-29`, `${month}-30`, `${month}-31`].indexOf(date) >= 0) {
-            ifLastMealFound = true;
-          }
-
-          let allergyCodes = formatAllergyCodes(item.content);
-
-          returnData[date] = {
-            meal: formatMeal(item.content),
-            allergyCodes: allergyCodes,
-            allergicFoods: extractAllergicFoods(allergyCodes)
-          };
-        }
-      });
-    }
-    return [returnData];
-  } catch (err) {
-    throw err;
-  }
-}
-
-export async function getAllMeal(maxToken: number) {
-  // 전체 급식 메뉴 가져오기
-  let returnData = {}; // JSON
-  try {
-    for (let currentToken = 0; currentToken <= maxToken; currentToken += 20) {
-      let data = await axios.get(`https://school.iamservice.net/api/article/organization/17195/group/2071367?next_token=${currentToken}`);
-      let items = data.data.articles;
-
-      Object.keys(items).forEach(key => {
-        let item = items[key];
-        let date = item.local_date_of_pub_date.replace(/\./g, "-");
-        let allergyCodes = formatAllergyCodes(item.content);
-
-        returnData[date] = {
-          meal: formatMeal(item.content),
-          allergyCodes: allergyCodes,
-          allergicFoods: extractAllergicFoods(allergyCodes)
+    Object.keys(cache).forEach(key => {
+      if (key.slice(0, 7) == _month) {
+        let item = cache[key];
+        mealDatas[key] = {
+          meal: item["meal"],
+          allergyCodes: item["allergyCodes"],
+          allergicFoods: item["allergicFoods"],
+          img: item["img"]
         };
-      });
-    }
-    return [returnData];
+      }
+    });
+    return mealDatas;
   } catch (err) {
     throw err;
   }
 }
 
-export default { fetchMeal, getTodayMeal, getMonthlyMeal, getAllMeal };
+export default { fetchMeal, getTodayMeal, getMonthlyMeal };
