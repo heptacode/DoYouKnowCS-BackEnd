@@ -1,6 +1,9 @@
 import * as express from "express";
 import * as https from "https";
 import { readFileSync } from "fs";
+import * as moment from "moment";
+import "moment-timezone";
+moment.tz.setDefault("Asia/Seoul");
 
 import * as cors from "cors";
 import * as helmet from "helmet";
@@ -30,7 +33,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/monthly", (req, res) => {
-  getMonthlyMeal("").then(data => {
+  getMonthlyMeal(moment(new Date()).format("YYYY-MM")).then(data => {
     res.send(data);
   });
 });

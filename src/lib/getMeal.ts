@@ -2,7 +2,35 @@ import axios from "axios";
 import * as moment from "moment";
 import "moment-timezone";
 moment.tz.setDefault("Asia/Seoul");
+
 const allergyDict = require("./allergy.json");
+
+let formatMeal = (meal: string) => {
+  return meal.replace(/\n/g, "<br>");
+};
+
+let formatAllergyCodes = (_allergyCodes: any) => {
+  let allergyCodes = _allergyCodes.match(/\d+\./g);
+  allergyCodes = [...new Set(allergyCodes)]; // 중복 제거
+  allergyCodes.sort((a, b) => a - b);
+  for (let i in allergyCodes) {
+    allergyCodes[i] = allergyCodes[i].replace(/\./g, "");
+  }
+  // allergyCodes = allergyCodes.join(" / "); // 배열을 문자열로 나열
+  return allergyCodes;
+};
+
+let extractAllergicFoods = (_allergyCodes: any) => {
+  let allergyCodes = _allergyCodes.match(/\d+\./g);
+  let allergicFoods = [];
+  allergyCodes = [...new Set(allergyCodes)]; // 중복 제거
+  allergyCodes.sort((a, b) => a - b);
+  for (let i in allergyCodes) {
+    allergyCodes[i] = allergyCodes[i].replace(/\./g, "");
+    allergicFoods.push(allergyDict[_allergyCodes[i]]);
+  }
+  return allergicFoods;
+};
 
 export async function getTodayMeal() {
   // 오늘, 어제 급식 가져오기
@@ -26,37 +54,24 @@ export async function getTodayMeal() {
     let items = data.data.articles;
     Object.keys(items).forEach(key => {
       let item = items[key];
-      // 식단 형식화
-      let meal = item.content.replace(/\n/g, "<br>");
-      // 알레르기 정보
-      let allergyCodes = item.content.match(/\d+\./g);
-      let allergicFoods = [];
-      allergyCodes = [...new Set(allergyCodes)]; // 중복 제거
-      allergyCodes.sort((a, b) => a - b);
-      for (let i in allergyCodes) {
-        allergyCodes[i] = allergyCodes[i].replace(/\./g, "");
-        allergicFoods.push(allergyDict[allergyCodes[i]]);
-      }
-      // allergyCodes = allergyCodes.join(" / "); // 배열을 문자열로 나열
-      //
       let date = item.local_date_of_pub_date.replace(/\./g, "-");
       if (moment(new Date()).format("YYYY-MM-DD") == date) {
         // 오늘 급식
         returnData[0] = {
           date: date, // 날짜
-          meal: meal, // 식단
+          meal: formatMeal(item.content), // 식단
           img: imgURLs[0], // 급식 이미지
-          allergyCodes: allergyCodes,
-          allergicFoods: allergicFoods
+          allergyCodes: formatAllergyCodes(item.content),
+          allergicFoods: extractAllergicFoods(item.content)
         };
       } else if (moment(new Date().setDate(new Date().getDate() - 1)).format("YYYY-MM-DD") == date) {
         // 어제 급식
         returnData[1] = {
           date: date, // 날짜
-          meal: meal, // 식단
+          meal: formatMeal(item.content), // 식단
           img: imgURLs[1], // 급식 이미지
-          allergyCodes: allergyCodes,
-          allergicFoods: allergicFoods
+          allergyCodes: formatAllergyCodes(item.content),
+          allergicFoods: extractAllergicFoods(item.content)
         };
       }
     });
@@ -69,32 +84,18 @@ export async function getTodayMeal() {
 export async function getMonthlyMeal(month: string) {
   // 월간 급식 메뉴 가져오기
   let returnData = {}; // JSON
+  let ifMealFound = false; // 해당 월 급식 정보를 찾았는지의 여부
   try {
-    if (month) {
-    }
-    for (let currentToken = 0; currentToken <= 0; currentToken += 20) {
+    for (let currentToken = 0; ifMealFound; currentToken += 20) {
       let data = await axios.get(`https://school.iamservice.net/api/article/organization/17195/group/2071367?next_token=${currentToken}`);
       let items = data.data.articles;
       Object.keys(items).forEach(key => {
         let item = items[key];
-        // 식단 형식화
-        let meal = item.content.replace(/\n/g, "<br>");
-        // 알레르기 정보
-        let allergyCodes = item.content.match(/\d+\./g);
-        let allergicFoods = [];
-        allergyCodes = [...new Set(allergyCodes)]; // 중복 제거
-        allergyCodes.sort((a, b) => a - b);
-        for (let i in allergyCodes) {
-          allergyCodes[i] = allergyCodes[i].replace(/\./g, "");
-          allergicFoods.push(allergyDict[allergyCodes[i]]);
-        }
-        // allergyCodes = allergyCodes.join(" / "); // 배열을 문자열로 나열
-        //
         let date = item.local_date_of_pub_date.replace(/\./g, "-");
         returnData[date] = {
-          meal: meal,
-          allergyCodes: allergyCodes,
-          allergicFoods: allergicFoods
+          meal: formatMeal(item.content),
+          allergyCodes: formatAllergyCodes(item.content),
+          allergicFoods: extractAllergicFoods(item.content)
         };
       });
     }
@@ -113,24 +114,11 @@ export async function getAllMeal(maxToken: number) {
       let items = data.data.articles;
       Object.keys(items).forEach(key => {
         let item = items[key];
-        // 식단 형식화
-        let meal = item.content.replace(/\n/g, "<br>");
-        // 알레르기 정보
-        let allergyCodes = item.content.match(/\d+\./g);
-        let allergicFoods = [];
-        allergyCodes = [...new Set(allergyCodes)]; // 중복 제거
-        allergyCodes.sort((a, b) => a - b);
-        for (let i in allergyCodes) {
-          allergyCodes[i] = allergyCodes[i].replace(/\./g, "");
-          allergicFoods.push(allergyDict[allergyCodes[i]]);
-        }
-        // allergyCodes = allergyCodes.join(" / "); // 배열을 문자열로 나열
-        //
         let date = item.local_date_of_pub_date.replace(/\./g, "-");
         returnData[date] = {
-          meal: meal,
-          allergyCodes: allergyCodes,
-          allergicFoods: allergicFoods
+          meal: formatMeal(item.content),
+          allergyCodes: formatAllergyCodes(item.content),
+          allergicFoods: extractAllergicFoods(item.content)
         };
       });
     }
