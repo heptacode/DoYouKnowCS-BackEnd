@@ -92,6 +92,11 @@ export async function fetchMeal() {
   }
 }
 
+export function getRawMeal() {
+  // ShortCuts용 급식 정보 반환
+  return `${cache[moment(new Date()).format("YYYY-MM-DD")]["meal"]}<br>${cache[moment(new Date()).format("YYYY-MM-DD")]["allergicFoods"]}`;
+}
+
 export function getTodayMeal() {
   // 오늘, 어제 급식
   let todayMeal = cache[moment(new Date()).format("YYYY-MM-DD")];
@@ -134,4 +139,4 @@ export function returnCache() {
   return cache;
 }
 
-export default { fetchMeal, getTodayMeal, JgetTodayMeal, getMonthlyMeal, JgetMonthlyMeal, returnCache };
+export default { fetchMeal, getRawMeal, getTodayMeal, JgetTodayMeal, getMonthlyMeal, JgetMonthlyMeal, returnCache };

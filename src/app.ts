@@ -13,7 +13,7 @@ import * as compression from "compression";
 import "dotenv/config";
 
 import Log from "./util/logger";
-import { fetchMeal, getTodayMeal, JgetTodayMeal, getMonthlyMeal, JgetMonthlyMeal, returnCache } from "./lib/getMeal";
+import { fetchMeal, getRawMeal, getTodayMeal, JgetTodayMeal, getMonthlyMeal, JgetMonthlyMeal, returnCache } from "./lib/getMeal";
 
 const app: express.Application = express();
 
@@ -32,6 +32,10 @@ app.get("/", (req, res) => {
 
 app.get("/J", (req, res) => {
   res.send(JgetTodayMeal());
+});
+
+app.get("/raw", (req, res) => {
+  res.send(getRawMeal());
 });
 
 app.get("/monthly", (req, res) => {
