@@ -10,7 +10,7 @@ import * as compression from "compression";
 import "dotenv/config";
 
 import Log from "./util/logger";
-import getMeal from "./lib/getMeal";
+import { getTodayMeal, getMonthlyMeal, getAllMeal } from "./lib/getMeal";
 
 const app: express.Application = express();
 
@@ -24,19 +24,31 @@ app.use(express.urlencoded({ extended: true, limit: "500mb" }));
 app.use(express.json({ limit: "500mb" }));
 
 app.get("/", (req, res) => {
-  getMeal("/").then(data => {
+  getTodayMeal().then(data => {
     res.send(data);
   });
 });
 
 app.get("/monthly", (req, res) => {
-  getMeal("monthly").then(data => {
+  getMonthlyMeal("").then(data => {
     res.send(data);
   });
 });
 
 app.get("/monthly/:p", (req, res) => {
-  getMeal(parseInt(req.params.p)).then(data => {
+  getMonthlyMeal(req.params.p).then(data => {
+    res.send(data);
+  });
+});
+
+app.get("/all", (req, res) => {
+  getAllMeal(0).then(data => {
+    res.send(data);
+  });
+});
+
+app.get("/all/:p", (req, res) => {
+  getAllMeal(parseInt(req.params.p)).then(data => {
     res.send(data);
   });
 });
