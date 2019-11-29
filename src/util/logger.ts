@@ -8,23 +8,23 @@ class logger {
     return moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
   }
   // Error
-  public e(str: string) {
+  public e(str: any) {
     console.log(`[${this.getTsp()}] ${chalk.red(str)}`);
   }
   // Warning
-  public w(str: string) {
+  public w(str: any) {
     console.log(`[${this.getTsp()}] ${chalk.yellow(str)}`);
   }
   // Info
-  public i(str: string) {
+  public i(str: any) {
     console.log(`[${this.getTsp()}] ${chalk.cyan(str)}`);
   }
   // Success
-  public s(str: string) {
+  public s(str: any) {
     console.log(`[${this.getTsp()}] ${chalk.green(str)}`);
   }
   // Verbose
-  public v(str: string) {
+  public v(str: any) {
     console.log(`[${this.getTsp()}] ${chalk.white(str)}`);
   }
   // Custom

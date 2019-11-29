@@ -3,7 +3,11 @@ import * as moment from "moment";
 import "moment-timezone";
 moment.tz.setDefault("Asia/Seoul");
 
+import Log from "../util/logger";
+
 const allergyDict = require("./allergy.json");
+
+let cache = {}; // JSON
 
 const formatMeal = (meal: string) => {
   return meal.replace(/\n/g, "<br>");
@@ -27,6 +31,61 @@ const extractAllergicFoods = (_allergyCodes: any) => {
   }
   return allergicFoods;
 };
+
+export async function fetchMeal() {
+  let mealDatas = {}; // JSON
+  let imgURLs = [];
+  let latestDate = "";
+
+  try {
+    for (let currentToken = 0; latestDate !== "2015-03-03"; currentToken += 20) {
+      let data = await axios.get(`https://school.iamservice.net/api/article/organization/17195/group/2071367?next_token=${currentToken}`);
+      let items = data.data.articles;
+
+      Object.keys(items).forEach(key => {
+        let item = items[key];
+        let date = item.local_date_of_pub_date.replace(/\./g, "-");
+        let allergyCodes = formatAllergyCodes(item.content);
+
+        mealDatas[date] = {
+          meal: formatMeal(item.content),
+          allergyCodes: allergyCodes,
+          allergicFoods: extractAllergicFoods(allergyCodes)
+        };
+
+        latestDate = date;
+        Log.i(date);
+      });
+      Log.w(currentToken);
+    }
+
+    latestDate = "";
+
+    for (let currentToken = 0; latestDate !== "2019-07-02"; currentToken += 20) {
+      let imgData = await axios.get(`https://school.iamservice.net/api/article/organization/17195/group/3318247?next_token=${currentToken}`);
+      let imgItems = imgData.data.articles;
+
+      Object.keys(imgItems).forEach(key => {
+        let imgItem = imgItems[key];
+        let date = imgItem.local_date_of_pub_date.replace(/\./g, "-");
+
+        mealDatas[date] += {
+          img: imgItem.images[0]
+        };
+
+        latestDate = date;
+        Log.i(date);
+      });
+      Log.w(currentToken);
+    }
+
+    Log.s("Fetch Success");
+    cache = mealDatas;
+    return mealDatas;
+  } catch (err) {
+    throw err;
+  }
+}
 
 export async function getTodayMeal() {
   // 오늘, 어제 급식 가져오기
@@ -145,4 +204,4 @@ export async function getAllMeal(maxToken: number) {
   }
 }
 
-export default { getTodayMeal, getMonthlyMeal, getAllMeal };
+export default { fetchMeal, getTodayMeal, getMonthlyMeal, getAllMeal };
