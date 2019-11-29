@@ -103,7 +103,7 @@ export function getRawMeal() {
 export function getTodayMeal() {
   // 오늘, 어제 급식
   let todayMeal = cache[moment(new Date()).format("YYYY-MM-DD")];
-  let yesterdayMeal = cache[moment(new Date()).format("YYYY-MM-DD")];
+  let yesterdayMeal = cache[moment(new Date().setDate(new Date().getDate() - 1)).format("YYYY-MM-DD")];
   return [todayMeal === null ? "급식 없음" : todayMeal, yesterdayMeal === null ? "급식 없음" : yesterdayMeal];
 }
 export function JgetTodayMeal() {
