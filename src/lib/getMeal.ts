@@ -11,8 +11,7 @@ let cache = {};
 
 const formatMeal = (_meal: string) => {
   return _meal
-    .replace(/\d\./g, "")
-    .replace(/\d/g, "")
+    .replace(/\d+\./g, "")
     .replace(/\n/g, "<br>");
 };
 
