@@ -52,12 +52,12 @@ HTTPS_PORT=(443 for default)
 
 - **/monthly/YYYY-DD**
   - Executes *getMonthlyMeal()* with client parameters
-  - Returns Meal Object Corresponding to client parameters
+  - Returns meal object orresponding to client parameters
 
 - **/fetch**
   - Executes async function *fetchMeal()*
   - Manually fetches meal
-  - Returns All of the meals so far (including images)
+  - Returns ALL of the meals so far (including images)
 
 - **/cache**
   - Executes *returnCache()*
@@ -78,4 +78,4 @@ HTTPS_PORT=(443 for default)
 
 - **/Jmonthly/YYYY-DD**
   - Executes *JgetMonthlyMeal()* with client parameters
-  - Returns Meal Object Corresponding to client parameters
+  - Returns meal object corresponding to client parameters
