@@ -104,14 +104,13 @@ export function getTodayMeal() {
   // 오늘, 어제 급식
   let todayMeal = cache[moment(new Date()).format("YYYY-MM-DD")];
   let yesterdayMeal = cache[moment(new Date().setDate(new Date().getDate() - 1)).format("YYYY-MM-DD")];
-  return [todayMeal === null ? "급식 없음" : todayMeal, yesterdayMeal === null ? "급식 없음" : yesterdayMeal];
+  console.log(todayMeal, yesterdayMeal);
+  return [!!todayMeal ? todayMeal : "급식 없음", !!yesterdayMeal ? yesterdayMeal : "급식 없음"];
 }
 export function JgetTodayMeal() {
-  return [
-    {
-      data: getTodayMeal()
-    }
-  ];
+  return {
+    data: getTodayMeal()
+  };
 }
 
 export function getMonthlyMeal(_month: string) {
@@ -131,11 +130,9 @@ export function getMonthlyMeal(_month: string) {
   return mealDatas;
 }
 export function JgetMonthlyMeal(_month: string) {
-  return [
-    {
-      data: getMonthlyMeal(_month)
-    }
-  ];
+  return {
+    data: getMonthlyMeal(_month)
+  };
 }
 
 export function returnCache() {
