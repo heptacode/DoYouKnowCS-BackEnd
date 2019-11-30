@@ -9,5 +9,5 @@
 		"target": "es6"
 	},
 	"include": ["src/**/*"],
-	"exclude": [".vscode", "node_modules", "**/*.spec.ts"]
+	"exclude": [".vscode", "node_modules"]
 }
