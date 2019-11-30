@@ -121,8 +121,8 @@ export function getTodayMeal() {
 }
 
 export function JgetTodayMeal() {
-  let todayMeal = cache[moment(new Date()).format("YYYY-MM-DD")].replace(/\<br>\./g, "\n");
-  let yesterdayMeal = cache[moment(new Date().setDate(new Date().getDate() - 1)).format("YYYY-MM-DD")].replace(/\<br>\./g, "\n");
+  let todayMeal = cache[moment(new Date()).format("YYYY-MM-DD")].replace(/\,/g, "\n").replace(/\<br>/g, "\n");
+  let yesterdayMeal = cache[moment(new Date().setDate(new Date().getDate() - 1)).format("YYYY-MM-DD")].replace(/\,/g, "\n").replace(/\<br>/g, "\n");
   return {
     data: [!!todayMeal ? todayMeal : "급식 없음", !!yesterdayMeal ? yesterdayMeal : "급식 없음"]
   };
@@ -153,7 +153,7 @@ export function JgetMonthlyMeal(_month: string) {
 
       mealData.push({
         date: key,
-        meal: item["meal"].replace(/\<br>\./g, "\n"),
+        meal: item["meal"].replace(/\,/g, "\n").replace(/\<br>/g, "\n"),
         allergyCodes: item["allergyCodes"],
         allergicFoods: item["allergicFoods"],
         img: !!item["img"] ? item["img"] : null
