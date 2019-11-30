@@ -70,7 +70,7 @@ HTTPS_PORT=(443 for default)
 - **/J**
   - Executes *JgetTodayMeal()*
   - Returns Today & Yesterday Meal
-  - Also returns "급식 없음" if meal not provided
+  - Also returns "급식 없음" if meal not served
 
 - **/Jmonthly**
   - Executes *JgetMonthlyMeal()*
