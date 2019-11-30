@@ -153,7 +153,7 @@ export function JgetMonthlyMeal(_month: string) {
 
       mealData.push({
         date: key,
-        meal: item["meal"].replace(/\,/g, "\n").replace(/\<br>/g, "\n"),
+        meal: `${item["meal"].replace(/\,/g, "\n").replace(/\<br>/g, "\n")}\n\n*${item["allergicFoods"]}`,
         allergyCodes: item["allergyCodes"],
         allergicFoods: item["allergicFoods"],
         img: !!item["img"] ? item["img"] : null
