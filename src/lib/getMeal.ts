@@ -39,31 +39,10 @@ const extractAllergicFoods = (_allergyCodes: any) => {
 export async function fetchMeal() {
   Log.v("Started Fetching");
 
-  let mealDatas = {}; // 급식 객체
-  let imgURLs = {}; // 이미지 객체
+  let firstData = {}; // 결합될 첫 번째 데이터
+  let secondData = {}; // 결합될 두 번째 데이터
+  let mealData = {}; // 최종 데이터
   let latestDate = ""; // 가장 마지막 급식 날짜
-
-  try {
-    for (let currentToken = 0; ["2019-07-03", "2018-12-27"].indexOf(latestDate) === -1 && currentToken <= 1200; currentToken += 20) {
-      let imgData = await axios.get(`https://school.iamservice.net/api/article/organization/17195/group/3318247?next_token=${currentToken}`);
-      let imgItems = imgData.data.articles;
-
-      Object.keys(imgItems).forEach(key => {
-        let imgItem = imgItems[key];
-        let date = imgItem.local_date_of_pub_date.replace(/\./g, "-");
-        if (imgItem.images !== null) {
-          imgURLs[date] = imgItem.images[0];
-        } else {
-          imgURLs[date] = `https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/SunrinInternetHighSchool.png/900px-SunrinInternetHighSchool.png`;
-        }
-
-        latestDate = date;
-      });
-    }
-    latestDate = "";
-  } catch (err) {
-    throw err;
-  }
 
   try {
     for (let currentToken = 0; latestDate !== "2015-03-03" && currentToken <= 2000; currentToken += 20) {
@@ -75,19 +54,53 @@ export async function fetchMeal() {
         let date = item.local_date_of_pub_date.replace(/\./g, "-");
         let allergyCodes = formatAllergyCodes(item.content);
 
-        mealDatas[date] = {
+        firstData[date] = {
           meal: formatMeal(item.content),
           allergyCodes: allergyCodes,
-          allergicFoods: extractAllergicFoods(allergyCodes),
-          img: imgURLs[date]
+          allergicFoods: extractAllergicFoods(allergyCodes)
         };
 
         latestDate = date;
       });
     }
-    cache = mealDatas;
+
+    latestDate = "";
+  } catch (err) {
+    throw err;
+  }
+
+  try {
+    for (let currentToken = 0; ["2019-07-03", "2018-12-27"].indexOf(latestDate) === -1 && currentToken <= 1200; currentToken += 20) {
+      let data = await axios.get(`https://school.iamservice.net/api/article/organization/17195/group/3318247?next_token=${currentToken}`);
+      let items = data.data.articles;
+
+      Object.keys(items).forEach(key => {
+        let item = items[key];
+        let date = item.local_date_of_pub_date.replace(/\./g, "-");
+
+        let allergyCodes = null;
+        let allergicFoods = null;
+        let img = `https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/SunrinInternetHighSchool.png/900px-SunrinInternetHighSchool.png`;
+
+        if (!!firstData[date]) allergyCodes = firstData[date]["allergyCodes"];
+        if (!!firstData[date]) allergicFoods = firstData[date]["allergicFoods"];
+        if (item.images !== null) img = item.images[0];
+
+        secondData[date] = {
+          meal: formatMeal(item.content),
+          allergyCodes: allergyCodes,
+          allergicFoods: allergicFoods,
+          img: img
+        };
+
+        latestDate = date;
+      });
+    }
+
+    mealData = Object.assign({}, firstData, secondData);
+    cache = mealData;
     Log.s("Finished Fetching");
-    return mealDatas;
+    return mealData;
   } catch (err) {
     throw err;
   }
@@ -115,23 +128,37 @@ export function JgetTodayMeal() {
 
 export function getMonthlyMeal(_month: string) {
   // 월간 급식
-  let mealDatas = {};
+  let mealData = {};
   Object.keys(cache).forEach(key => {
     if (key.slice(0, 7) === _month) {
       let item = cache[key];
-      mealDatas[key] = {
+      mealData[key] = {
         meal: item["meal"],
         allergyCodes: item["allergyCodes"],
         allergicFoods: item["allergicFoods"],
-        img: item["img"]
+        img: !!item["img"] ? item["img"] : null
       };
     }
   });
-  return mealDatas;
+  return mealData;
 }
 export function JgetMonthlyMeal(_month: string) {
+  let mealData = [];
+  Object.keys(cache).forEach(key => {
+    if (key.slice(0, 7) === _month) {
+      let item = cache[key];
+
+      mealData.push({
+        date: key,
+        meal: item["meal"],
+        allergyCodes: item["allergyCodes"],
+        allergicFoods: item["allergicFoods"],
+        img: !!item["img"] ? item["img"] : null
+      });
+    }
+  });
   return {
-    data: getMonthlyMeal(_month)
+    data: mealData
   };
 }
 
