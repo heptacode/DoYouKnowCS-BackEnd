@@ -37,8 +37,8 @@ HTTPS_PORT=(443 for default)
 
 ## Express Routes
 - **/**
-  - Executes *getTodayMeal()*
-  - Returns Today & Yesterday Meal
+  - Executes *getRecentMeal()*
+  - Returns Yesterday, Today, Tomorrow Meal
   - Also returns "급식 없음" if meal not served
 
 - **/raw**
@@ -68,8 +68,8 @@ HTTPS_PORT=(443 for default)
 
 ## Express Routes (Android Java Support)
 - **/J**
-  - Executes *JgetTodayMeal()*
-  - Returns Today & Yesterday Meal
+  - Executes *JgetRecentMeal()*
+  - Returns Yesterday, Today, Tomorrow Meal
   - Also returns "급식 없음" if meal not served
 
 - **/Jmonthly**
