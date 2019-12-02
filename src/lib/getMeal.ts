@@ -13,9 +13,9 @@ const allergyDict = require("./allergy.json");
 
 let cache = {};
 
-const formatMeal = (_meal: string) => {
-  return _meal.replace(/\d+\./g, "").replace(/\n/g, "<br>");
-};
+// const formatMeal = (_meal: string) => {
+//   return _meal.replace(/\d+\./g, "").replace(/\n/g, "<br>");
+// };
 
 const formatAllergyCodes = (_meal: string) => {
   let allergyCodes = _meal.match(/\d+\./g);
@@ -55,7 +55,7 @@ export async function fetchMeal() {
         let allergyCodes = formatAllergyCodes(item.content);
 
         firstData[date] = {
-          meal: formatMeal(item.content),
+          meal: item.content.replace(/\d+\./g, "").replace(/\n/g, "<br>"),
           allergyCodes: allergyCodes,
           allergicFoods: extractAllergicFoods(allergyCodes)
         };
@@ -87,7 +87,7 @@ export async function fetchMeal() {
         if (item.images !== null) img = item.images[0];
 
         secondData[date] = {
-          meal: formatMeal(item.content),
+          meal: item.content.replace(/\d+\./g, "").replace(/\,/g, "<br>").replace(/\n/g, "<br>"),
           allergyCodes: allergyCodes,
           allergicFoods: allergicFoods,
           img: img
@@ -123,9 +123,9 @@ export function getRecentMeal() {
 
 export function JgetRecentMeal() {
   // 최근(어제, 오늘, 내일) 급식 - Java
-  let yesterdayMeal = cache[moment(new Date().setDate(new Date().getDate() - 1)).format("YYYY-MM-DD")].replace(/\,/g, "\n").replace(/\<br>/g, "\n");
-  let todayMeal = cache[moment(new Date()).format("YYYY-MM-DD")].replace(/\,/g, "\n").replace(/\<br>/g, "\n");
-  let tomorrowMeal = cache[moment(new Date().setDate(new Date().getDate() + 1)).format("YYYY-MM-DD")].replace(/\,/g, "\n").replace(/\<br>/g, "\n");
+  let yesterdayMeal = cache[moment(new Date().setDate(new Date().getDate() - 1)).format("YYYY-MM-DD")].replace(/\<br>/g, "\n");
+  let todayMeal = cache[moment(new Date()).format("YYYY-MM-DD")].replace(/\<br>/g, "\n");
+  let tomorrowMeal = cache[moment(new Date().setDate(new Date().getDate() + 1)).format("YYYY-MM-DD")].replace(/\<br>/g, "\n");
   return {
     data: [!!yesterdayMeal ? yesterdayMeal : "급식 없음", !!todayMeal ? todayMeal : "급식 없음", !!tomorrowMeal ? tomorrowMeal : "급식 없음"]
   };
@@ -157,7 +157,7 @@ export function JgetMonthlyMeal(_month: string) {
 
       mealData.push({
         date: key,
-        meal: `${item["meal"].replace(/\,/g, "\n").replace(/\<br>/g, "\n")}\n\n*(${item["allergicFoods"]})`,
+        meal: `${item["meal"].replace(/\<br>/g, "\n")}\n\n*(${item["allergicFoods"]})`,
         allergyCodes: item["allergyCodes"],
         allergicFoods: item["allergicFoods"],
         img: !!item["img"] ? item["img"] : null
