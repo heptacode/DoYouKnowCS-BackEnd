@@ -113,18 +113,21 @@ export function getRawMeal() {
   &ast;(${cache[moment(new Date()).format("YYYY-MM-DD")]["allergicFoods"]})`;
 }
 
-export function getTodayMeal() {
-  // 오늘, 어제 급식
-  let todayMeal = cache[moment(new Date()).format("YYYY-MM-DD")];
+export function getRecentMeal() {
+  // 최근(어제, 오늘, 내일) 급식
   let yesterdayMeal = cache[moment(new Date().setDate(new Date().getDate() - 1)).format("YYYY-MM-DD")];
-  return [!!todayMeal ? todayMeal : "급식 없음", !!yesterdayMeal ? yesterdayMeal : "급식 없음"];
+  let todayMeal = cache[moment(new Date()).format("YYYY-MM-DD")];
+  let tomorrowMeal = cache[moment(new Date().setDate(new Date().getDate() + 1)).format("YYYY-MM-DD")];
+  return [!!yesterdayMeal ? yesterdayMeal : "급식 없음", !!todayMeal ? todayMeal : "급식 없음", !!tomorrowMeal ? tomorrowMeal : "급식 없음"];
 }
 
-export function JgetTodayMeal() {
-  let todayMeal = cache[moment(new Date()).format("YYYY-MM-DD")].replace(/\,/g, "\n").replace(/\<br>/g, "\n");
+export function JgetRecentMeal() {
+  // 최근(어제, 오늘, 내일) 급식 - Java
   let yesterdayMeal = cache[moment(new Date().setDate(new Date().getDate() - 1)).format("YYYY-MM-DD")].replace(/\,/g, "\n").replace(/\<br>/g, "\n");
+  let todayMeal = cache[moment(new Date()).format("YYYY-MM-DD")].replace(/\,/g, "\n").replace(/\<br>/g, "\n");
+  let tomorrowMeal = cache[moment(new Date().setDate(new Date().getDate() + 1)).format("YYYY-MM-DD")].replace(/\,/g, "\n").replace(/\<br>/g, "\n");
   return {
-    data: [!!todayMeal ? todayMeal : "급식 없음", !!yesterdayMeal ? yesterdayMeal : "급식 없음"]
+    data: [!!yesterdayMeal ? yesterdayMeal : "급식 없음", !!todayMeal ? todayMeal : "급식 없음", !!tomorrowMeal ? tomorrowMeal : "급식 없음"]
   };
 }
 
@@ -146,6 +149,7 @@ export function getMonthlyMeal(_month: string) {
 }
 
 export function JgetMonthlyMeal(_month: string) {
+  // 월간 급식 - Java
   let mealData = [];
   Object.keys(cache).forEach(key => {
     if (key.slice(0, 7) === _month) {
@@ -169,4 +173,4 @@ export function returnCache() {
   return cache;
 }
 
-export default { fetchMeal, getRawMeal, getTodayMeal, JgetTodayMeal, getMonthlyMeal, JgetMonthlyMeal, returnCache };
+export default { fetchMeal, getRawMeal, getRecentMeal, JgetRecentMeal, getMonthlyMeal, JgetMonthlyMeal, returnCache };

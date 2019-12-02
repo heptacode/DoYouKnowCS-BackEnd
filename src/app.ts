@@ -13,7 +13,7 @@ import * as compression from "compression";
 import "dotenv/config";
 
 import Log from "./util/logger";
-import { fetchMeal, getRawMeal, getTodayMeal, JgetTodayMeal, getMonthlyMeal, JgetMonthlyMeal, returnCache } from "./lib/getMeal";
+import { fetchMeal, getRawMeal, getRecentMeal, JgetRecentMeal, getMonthlyMeal, JgetMonthlyMeal, returnCache } from "./lib/getMeal";
 
 const app: express.Application = express();
 
@@ -27,11 +27,11 @@ app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(express.json({ limit: "50mb" }));
 
 app.get("/", (req, res) => {
-  res.send(getTodayMeal());
+  res.send(getRecentMeal());
 });
 
 app.get("/J", (req, res) => {
-  res.send(JgetTodayMeal());
+  res.send(JgetRecentMeal());
 });
 
 app.get("/raw", (req, res) => {
