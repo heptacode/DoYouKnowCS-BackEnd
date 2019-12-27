@@ -4,7 +4,7 @@
     "package.json",
     "pm2.json",
     "tsconfig.json",
-    "webpoack.config.js",
+    "webpack.config.js",
     ".env"
   ],
   "exec": "ts-node src/app.ts",
